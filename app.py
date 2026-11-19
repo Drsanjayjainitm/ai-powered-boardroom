@@ -1,3 +1,4 @@
+from utils.cloud_ai import gemini_sidebar
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -41,9 +42,8 @@ with st.sidebar:
         api_key = st.text_input("OpenAI API key", type="password")
         model = st.text_input("Model", value="gpt-4o-mini")
     elif provider == "Google Gemini":
-        api_key = st.text_input("Gemini API key", type="password")
-        model = st.text_input("Model", value="gemini-2.0-flash")
-    st.caption("Demo is rule-based, not generative AI. Cloud AI requires an API key; local Ollama does not.")
+        api_key, model = gemini_sidebar()
+    st.caption("Demo is rule-based, not generative AI. Gemini is configured through Streamlit Secrets; local Ollama requires a local server.")
     if st.button("Reset current simulation"):
         st.session_state["last_result"] = None
         st.session_state["last_decision"] = None
