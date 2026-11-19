@@ -41,6 +41,21 @@ def _call_gemini(system_prompt, user_prompt, api_key, model):
     )
     return response.text
 
+def _safe_provider_error(exc):
+    """Classify cloud failures without disclosing credentials or raw responses."""
+    code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+    if code == 400:
+        return "Invalid API request or model configuration (HTTP 400)"
+    if code == 401 or code == 403:
+        return "API key or project permission rejected (HTTP 401/403)"
+    if code == 404:
+        return "Model not found or unavailable to this project (HTTP 404)"
+    if code == 429:
+        return "API rate limit or quota reached (HTTP 429)"
+    if isinstance(code, int) and code >= 500:
+        return "AI provider temporarily unavailable (HTTP 5xx)"
+    return "AI provider request failed (" + type(exc).__name__ + ")"
+
 def _call_ollama(system_prompt, user_prompt, model="llama3.2:1b", base_url="http://localhost:11434"):
     """Use Ollama's local HTTP API. No cloud key or Python Ollama package required."""
     import json
@@ -98,4 +113,4 @@ def get_advisor_recommendations(role, decision, result, provider="Demo mode (no 
         safe = safe_qualitative(response)
         return evidence + "\n\n" + ("**AI-generated qualitative coaching (screened)**\n\n" + safe if safe else fallback_coaching(role))
     except Exception as exc:
-        return evidence + f"\n\n**AI unavailable ({type(exc).__name__}); rule-based coaching shown.**\n\n" + fallback_coaching(role)
+        return evidence + f"\n\n**AI unavailable: {_safe_provider_error(exc)}; rule-based coaching shown.**\n\n" + fallback_coaching(role)

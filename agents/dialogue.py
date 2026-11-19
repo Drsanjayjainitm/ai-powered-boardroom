@@ -1,6 +1,6 @@
 """Role-specific follow-up questions. Demo is deterministic; live responses require API access."""
 import re
-from agents.advisors import ADVISOR_BRIEFS, _call_openai, _call_gemini, _call_ollama
+from agents.advisors import ADVISOR_BRIEFS, _call_openai, _call_gemini, _call_ollama, _safe_provider_error
 from agents.grounding import verified_advisor_markdown, qualitative_context, safe_qualitative, fallback_coaching
 
 def _demo_answer(role, question, decision, result):
@@ -58,4 +58,4 @@ def ask_advisor(role, question, decision, result, provider, api_key="", model=""
         safe = safe_qualitative(response)
         return evidence + "\n\n" + ("**AI-generated qualitative coaching (screened)**\n\n" + safe if safe else fallback_coaching(role, question))
     except Exception as exc:
-        return evidence + f"\n\n**AI unavailable ({type(exc).__name__}); rule-based coaching shown.**\n\n" + fallback_coaching(role, question)
+        return evidence + f"\n\n**AI unavailable ({_safe_provider_error(exc)}); rule-based coaching shown.**\n\n" + fallback_coaching(role, question)

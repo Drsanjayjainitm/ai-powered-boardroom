@@ -1,6 +1,6 @@
 """Numerically grounded mentor: deterministic facts + qualitative LLM commentary."""
 import re
-from agents.advisors import _call_openai, _call_gemini, _call_ollama
+from agents.advisors import _call_openai, _call_gemini, _call_ollama, _safe_provider_error
 
 BUDGET_LAKH = 50.0
 BASE_REVENUE_LAKH = 250.0
@@ -243,5 +243,5 @@ def mentor_feedback(history, provider='Demo mode (no API key)', api_key='', mode
             label = '**Qualitative mentor feedback — AI-generated narrative, verified actions and numerical evidence**'
         return facts + '\n' + label + '\n\n' + safe
     except Exception as exc:
-        return (facts + '\n**AI mentor unavailable** (' + type(exc).__name__ + '). '
+        return (facts + '\n**AI mentor unavailable** (' + _safe_provider_error(exc) + '). '
                 'Check the selected provider and model; the verified numerical evidence above remains valid.')

@@ -1,4 +1,5 @@
 """PromptEd Milestone 3: a 3-round cumulative investment teaching exercise."""
+from utils.cloud_ai import gemini_sidebar
 import json
 import pandas as pd
 import plotly.express as px
@@ -36,9 +37,11 @@ with st.sidebar:
     if provider == 'Ollama (local, free)':
         model = st.text_input('Local Ollama model', value='llama3.2:1b', key='m3_ollama_model')
         st.caption('No API key needed. Run Ollama on this computer at localhost:11434.')
-    elif provider in ('OpenAI', 'Google Gemini'):
-        api_key = st.text_input('API key', type='password', key='m3_key')
-        model = st.text_input('Model', value='gpt-4o-mini' if provider == 'OpenAI' else 'gemini-2.0-flash', key='m3_model')
+    elif provider == 'OpenAI':
+        api_key = st.text_input('OpenAI API key', type='password', key='m3_openai_key')
+        model = st.text_input('Model', value='gpt-4o-mini', key='m3_openai_model')
+    elif provider == 'Google Gemini':
+        api_key, model = gemini_sidebar()
     st.caption('Demo responses are deterministic rules, not generative AI.')
     if st.button('Reset all three rounds', key='m3_reset'):
         st.session_state.m3_history = []
