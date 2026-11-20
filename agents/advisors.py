@@ -86,8 +86,8 @@ def get_advisor_recommendations(role, decision, result, provider="Demo mode (no 
         return evidence + "\n\nEnter a provider API key, or choose Ollama for local inference."
     system_prompt = (
         ADVISOR_BRIEFS[role] + "\nYou are an educational coach. All numerical and decision facts "
-        "are displayed separately by Python. Provide ONLY qualitative coaching, "
-        "without numerical claims, financial terms, selected decision descriptions, "
+        "are displayed separately by Python. Provide role-specific, practical qualitative coaching, "
+        "without numerical claims, invented decision descriptions, "
         "or causal claims. Ask one probing classroom question. Keep it under 100 words."
     )
     user_prompt = qualitative_context(decision, result) + "\nProvide concise qualitative coaching."

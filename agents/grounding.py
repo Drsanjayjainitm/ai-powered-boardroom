@@ -53,28 +53,26 @@ def qualitative_context(decision, result):
             "Do not invent decision changes or causal explanations. Do not compute figures.")
 
 
-DISALLOWED = re.compile(
-    r"\b(?:revenue|profit|budget|investment|reserve|cash|pricing|prices|operations|risk|satisfaction|" 
-    r"loss|gain|increase|decrease|grew|fell|growth|decline|percent|percentages|roi|payback)\b",
-    re.I,
-)
-
-
+# Financial vocabulary is normal in management coaching. Reject invented figures,
+# not words such as "profit" or "risk"; Python alone supplies numeric evidence.
 def safe_qualitative(text):
-    """Accept only nonnumeric, nonfinancial coaching prose; otherwise use a labelled fallback.
-
-    Not a semantic truth verifier. Restrict LLM to generic teaching prompts, while
-    deterministic code owns all decision/financial assertions.
-    """
-    if not isinstance(text, str) or len(text.strip()) < 35:
+    """Conservatively screen a short, nonnumeric coaching response."""
+    if not isinstance(text, str):
         return None
-    if re.search(r'[0-9₹%$]', text):
+    cleaned = text.strip()
+    if len(cleaned) < 35 or len(cleaned.split()) > 180:
         return None
-    if DISALLOWED.search(text):
+    if re.search(r'[0-9₹%$]', cleaned):
         return None
-    if len(text.split()) > 160:
+    if re.search(r'\bprofit (?:declined|fell|decreased) because of (?:the )?reserve\b', cleaned, re.I):
         return None
-    return text.strip()
+    # Explicit invented decision descriptions / unsupported numerical comparisons
+    # are excluded; verified decisions and all figures appear separately.
+    if re.search(r'\b(?:you (?:chose|selected|changed|increased|decreased|allocated)|'
+                 r'you(?:r company)? (?:earned|spent|invested)|'
+                 r'budget (?:was|is) exceeded|guaranteed (?:return|profit))\b', cleaned, re.I):
+        return None
+    return cleaned
 
 
 def fallback_coaching(role, question=''):
@@ -85,7 +83,13 @@ def fallback_coaching(role, question=''):
         'COO': 'Which service-quality indicator would you monitor during implementation?',
         'Risk Officer': 'Which assumption would you challenge before approving the strategy?',
     }
-    return ("**Qualitative coaching — rule-based fallback**\n\n"
-            "Consider the evidence, alternative explanations, and what you would test next. "
-            "Separate model assumptions from observed business evidence.\n\n"
-            f"**Challenge for the CEO:** {prompts[role]}")
+    guidance = {
+        'CFO': 'Separate the underlying operating contribution from one-time implementation spending. Examine payback assumptions and whether a phased commitment would protect flexibility.',
+        'CMO': 'Choose a customer segment, define a measurable conversion or retention target, and compare a small campaign test against a control group.',
+        'CHRO': 'Link training to specific employee capabilities, monitor adoption and workload, and invite frontline feedback before scaling change.',
+        'COO': 'Map the process bottleneck, test a limited rollout, and monitor fulfilment accuracy and service quality before expanding.',
+        'Risk Officer': 'Challenge the demand assumptions, set a downside trigger, protect customer data and identify a contingency response.'
+    }
+    return ("**Qualitative coaching — role-specific rule-based fallback**\n\n"
+            + guidance[role] + "\n\n"
+            + f"**Challenge for the CEO:** {prompts[role]}")

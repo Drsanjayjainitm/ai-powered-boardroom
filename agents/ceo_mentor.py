@@ -24,8 +24,8 @@ Do NOT generate action lists or CEO questions; Python provides those separately.
 Keep it between 80 and 160 words. Never repeat the numeric case evidence.
 Pricing and operations choices must be described exactly as supplied. Never claim a change
 unless VERIFIED DECISION CHANGES explicitly confirms it. Never introduce hypothetical
-risks as if they occurred. Under the final heading, suggest exactly two actions and one
-question. Avoid numbers in the generated response.
+risks as if they occurred. Python supplies two actions and a CEO question after your commentary. Do not add them.
+Avoid numbers in the generated response.
 """
 
 
@@ -127,7 +127,7 @@ def _validated_ai_sections(answer):
     # Accept common Markdown formatting variants, but never trust generated figures.
     for line in answer.splitlines():
         stripped = line.strip()
-        if stripped.startswith('#'):
+        if stripped.startswith('#') or stripped.strip('*').rstrip(':').strip() in titles:
             heading = stripped.lstrip('#').strip().replace('**', '').rstrip(':').strip()
             current = heading if heading in titles else None
             if current:

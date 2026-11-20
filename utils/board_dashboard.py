@@ -3,6 +3,7 @@ import hashlib
 import json
 import streamlit as st
 from agents.advisors import get_advisor_recommendations
+from agents.grounding import verified_advisor_markdown
 
 ROLES = ('CFO', 'CMO', 'CHRO', 'COO', 'Risk Officer')
 
@@ -29,6 +30,9 @@ def render_board(decision, result, provider, api_key, model, state_key):
     if not saved:
         st.info('Click the button to display all five advisor outcomes. In Gemini mode, this uses up to five API requests.')
         return
+    st.markdown('##### Shared verified financial evidence')
+    st.markdown(verified_advisor_markdown(decision, result))
+    st.markdown('##### Advisor-specific perspectives')
     for start in (0, 2, 4):
         pair = ROLES[start:start+2]
         cols = st.columns(len(pair))
@@ -36,5 +40,11 @@ def render_board(decision, result, provider, api_key, model, state_key):
             with col:
                 with st.container(border=True):
                     st.markdown(f'**{role}**')
-                    st.markdown(saved['responses'][role])
+                    response = saved['responses'][role]
+                    # The financial facts are already shown once above. Keep
+                    # each advisor's qualitative feedback and its source label.
+                    evidence = verified_advisor_markdown(decision, result)
+                    if response.startswith(evidence):
+                        response = response[len(evidence):].strip()
+                    st.markdown(response)
     st.caption('Python computes the verified financial evidence. AI commentary is screened; fallback text is labelled.')

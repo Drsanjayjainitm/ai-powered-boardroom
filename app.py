@@ -52,7 +52,7 @@ with st.sidebar:
         st.session_state.pop("studio_board_all", None)
         st.rerun()
 
-hero('PROMPTED 2026 · PROFESSIONAL TRACK · COMPETITION QUALITY PATCH 3.4.1',
+hero('PROMPTED 2026 · PROFESSIONAL TRACK · MILESTONE 4.1.5 · CLASSROOM PILOT',
      'AI-Powered Boardroom',
      'Lead the recovery of Aarohan Retail. Make strategic decisions, challenge five AI advisors, and defend the trade-offs.')
 st.markdown('<span class="pill">CEO Strategy Studio · Single-decision sandbox</span>', unsafe_allow_html=True)

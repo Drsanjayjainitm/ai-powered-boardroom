@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from decimal import Decimal, ROUND_HALF_UP
 
 from utils.ui import apply_theme, hero
 from simulation.multiround import (CAPS, BUDGET, MAX_ROUNDS, run_round,
@@ -16,7 +17,7 @@ from agents.advisors import get_advisor_recommendations
 
 st.set_page_config(page_title='CEO Decision Lab | AI-Powered Boardroom', page_icon='📈', layout='wide')
 apply_theme()
-hero('PROMPTED 2026 · PROFESSIONAL TRACK · COMPETITION QUALITY PATCH 3.4.1',
+hero('PROMPTED 2026 · PROFESSIONAL TRACK · MILESTONE 4.1.5 · CLASSROOM PILOT',
      'CEO Decision Lab',
      'Three decisions. One recovery strategy. Use evidence, debate trade-offs, and reflect like a CEO.')
 st.markdown('<span class="pill">3-round learning journey · Aarohan Retail Pvt. Ltd.</span>', unsafe_allow_html=True)
@@ -193,12 +194,12 @@ if history:
                'history':history}
     from io import StringIO
     summary = [
-        '# CEO Learning Summary — Milestone 3.4',
+        '# CEO Learning Summary — Milestone 4.1.5',
         'Fictional teaching simulation; not a financial forecast.',
         f'Rounds completed: {len(history)}',
         f"Cumulative investment: ₹{r['investment_lakh']:.1f} lakh; remaining: ₹{BUDGET-r['investment_lakh']:.1f} lakh",
         f"Final revenue: ₹{r['revenue_crore']:.2f} crore; year-one profit: ₹{r['profit_lakh']:.1f} lakh",
-        f"Final satisfaction: {r['customer_satisfaction']:.1f}/100; risk: {r['risk_level']}",
+        f"Final satisfaction: {Decimal(str(round(r['customer_satisfaction'], 2))).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)}/100; risk: {r['risk_level']}",
         f"Final formative score: {latest['assessment']['total']}/100",
         '', 'Round reflections:',
     ]
@@ -216,5 +217,5 @@ if history:
                        file_name='ceo_decision_portfolio.json', mime='application/json')
 
 st.divider()
-st.caption('Milestone 3.4.1 classroom release · Data stored in current Streamlit session only. '
+st.caption('Milestone 4.1.5 classroom pilot release · Data stored in current Streamlit session only. '
            'Avoid entering personal or confidential business information.')
