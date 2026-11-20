@@ -49,7 +49,7 @@ def ask_advisor(role, question, decision, result, provider, api_key="", model=""
                "unsupported business outcomes or causal certainty. "
                "Python separately provides the exact financial facts. "
                "Do not repeat the learner question. Keep it under 110 words; "
-               "do not output digits, currency symbols or numerical estimates. Never output code, JSON, dictionaries, backticks, or programming examples. Explain that the one-time investment is deducted from year-one profit; do not assert that variable costs rose unless observed.")
+               "do not output digits, currency symbols or numerical estimates.")
     prompt = qualitative_context(decision, result) + "\nLearner question: " + question
     try:
         if provider == "Ollama (local, free)":

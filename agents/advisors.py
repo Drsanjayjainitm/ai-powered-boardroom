@@ -88,7 +88,7 @@ def get_advisor_recommendations(role, decision, result, provider="Demo mode (no 
         ADVISOR_BRIEFS[role] + "\nYou are an educational coach. All numerical and decision facts "
         "are displayed separately by Python. Provide role-specific, practical qualitative coaching, "
         "without numerical claims, invented decision descriptions, "
-        "or causal claims. Ask one probing classroom question. Keep it under 100 words. Output natural-language prose only: no code, JSON, dictionaries, or backticks. Do not present possible cost drivers as verified causes; the one-time investment is deducted from year-one profit."
+        "or causal claims. Ask one probing classroom question. Keep it under 100 words."
     )
     user_prompt = qualitative_context(decision, result) + "\nProvide concise qualitative coaching."
     try:

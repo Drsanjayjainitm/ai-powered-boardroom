@@ -1,6 +1,5 @@
 """Numerically grounded mentor: deterministic facts + qualitative LLM commentary."""
 import re
-from agents.grounding import sanitize_ai_prose
 from agents.advisors import _call_openai, _call_gemini, _call_ollama, _safe_provider_error
 
 BUDGET_LAKH = 50.0
@@ -26,7 +25,7 @@ Keep it between 80 and 160 words. Never repeat the numeric case evidence.
 Pricing and operations choices must be described exactly as supplied. Never claim a change
 unless VERIFIED DECISION CHANGES explicitly confirms it. Never introduce hypothetical
 risks as if they occurred. Python supplies two actions and a CEO question after your commentary. Do not add them.
-Avoid numbers in the generated response. Output prose only, never code, JSON, dictionaries, or programming examples. The one-time investment is deducted from year-one profit; do not attribute the profit decline to unverified cost increases.
+Avoid numbers in the generated response.
 """
 
 
@@ -121,50 +120,30 @@ def _deterministic_strategy_commentary(history, f):
 
 
 def _validated_ai_sections(answer):
-    """Parse three narrative sections, allowing common Gemini heading variants.
-
-    Never admit AI-authored figures or code; Python supplies verified evidence and actions.
-    """
-    cleaned = sanitize_ai_prose(answer)
-    if not cleaned:
-        return None
+    """Allow only prose under three expected headings; Python owns actions and question."""
     titles = ('Strategic Strengths', 'Financial and Risk Trade-offs', 'Reflection and Learning')
-    aliases = {
-        'strategic strengths': titles[0], 'strengths': titles[0],
-        'financial and risk trade-offs': titles[1], 'financial & risk trade-offs': titles[1],
-        'financial and risk tradeoffs': titles[1], 'financial and risk trade offs': titles[1],
-        'financial trade-offs': titles[1], 'financial and risk considerations': titles[1],
-        'reflection and learning': titles[2], 'reflection & learning': titles[2],
-        'learning and reflection': titles[2], 'reflection': titles[2],
-    }
-    sections = {t: [] for t in titles}
+    sections = {}
     current = None
-    for line in cleaned.splitlines():
+    # Accept common Markdown formatting variants, but never trust generated figures.
+    for line in answer.splitlines():
         stripped = line.strip()
-        heading = re.sub(r'^#{1,6}\s*', '', stripped)
-        heading = re.sub(r'^\*\*(.*?)\*\*:?$', r'\1', heading).strip().rstrip(':').strip()
-        heading = re.sub(r'^[-*]\s+', '', heading).strip()
-        if heading.lower() in aliases:
-            current = aliases[heading.lower()]
+        if stripped.startswith('#') or stripped.strip('*').rstrip(':').strip() in titles:
+            heading = stripped.lstrip('#').strip().replace('**', '').rstrip(':').strip()
+            current = heading if heading in titles else None
+            if current:
+                sections[current] = []
             continue
-        if stripped.startswith('#'):
-            current = None
-            continue
-        if not current or not stripped:
-            continue
-        if re.search(r'[0-9₹%$]', stripped):
-            continue
-        if re.search(r'\b(?:budget (?:exceeded|violation)|insufficient budget)\b', stripped, re.I):
-            continue
-        # Do not allow invented claims that decisions changed; actual choices are
-        # printed separately from verified history.
-        if re.search(r'\b(?:you|the CEO) (?:changed|switched|raised|lowered) (?:pricing|prices|operations)\b', stripped, re.I):
-            continue
-        sections[current].append(stripped)
-    if any(not sections[t] for t in titles):
+        if current and stripped and not re.search(r'[0-9₹%$]', stripped):
+            if re.search(r'\b(?:budget (?:exceeded|violation)|insufficient budget)\b', stripped, re.I):
+                continue
+            if re.search(r'\b(?:pricing|prices|operations|operational strategy)\b', stripped, re.I):
+                # Do not trust LLM assertions about decision history; Python prints those separately.
+                continue
+            sections[current].append(stripped)
+    if any(not sections.get(t) for t in titles):
         return None
-    prose = '\n\n'.join('### ' + title + '\n' + ' '.join(sections[title]) for title in titles)
-    return prose if len(prose.split()) >= 25 else None
+    # Only use AI in these sections; verified history and actionable prompts remain deterministic.
+    return '\n\n'.join('### ' + t + '\n' + ' '.join(sections[t]) for t in titles)
 
 
 def _verified_actions(history):
