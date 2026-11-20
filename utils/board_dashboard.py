@@ -39,7 +39,7 @@ def render_board(decision, result, provider, api_key, model, state_key):
         for col, role in zip(cols, pair):
             with col:
                 with st.container(border=True):
-                    st.markdown(f'**{role}**')
+                    st.markdown(f'#### {role}')
                     response = saved['responses'][role]
                     # The financial facts are already shown once above. Keep
                     # each advisor's qualitative feedback and its source label.

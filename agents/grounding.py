@@ -56,44 +56,47 @@ def qualitative_context(decision, result):
 # Financial vocabulary is normal in management coaching. Reject invented figures,
 # not words such as "profit" or "risk"; Python alone supplies numeric evidence.
 def sanitize_ai_prose(text):
-    """Remove model-generated code artifacts, without silently rewriting financial claims.
+    """Keep human-readable coaching; remove complete fenced and unfenced code islands.
 
-    Return None if code is interleaved with prose in an unsafe or ambiguous way.
+    Fail closed when an isolated code fragment cannot be separated from prose.
     """
     if not isinstance(text, str):
         return None
-    # Remove complete fenced code blocks (including malformed open fences).
-    text = re.sub(r'```[^\n]*\n.*?(?:```|\Z)', '', text, flags=re.S)
-    text = re.sub(r'~~~[^\n]*\n.*?(?:~~~|\Z)', '', text, flags=re.S)
-    lines = []
-    in_code = False
+    text = re.sub(r'(?ms)^\s*(```|~~~)[^\n]*\n.*?^\s*(?:```|~~~)\s*$', '', text)
+    text = re.sub(r'(?ms)^\s*(```|~~~)[^\n]*\n.*\Z', '', text)
+    output = []
+    code = False
+    brace_depth = 0
     for line in text.splitlines():
         t = line.strip()
         if not t:
-            if not in_code:
-                lines.append('')
+            if not code:
+                output.append('')
             continue
-        # A generated Python/JSON snippet can be unfenced and embedded in Markdown.
-        if re.match(r'^(?:#\s*(?:decision|financial|numerical|verified|data|facts|trend)|'
-                    r'(?:from|import)\s+\w+|(?:print|json\.dumps)\s*\(|'
-                    r'[A-Za-z_][\w]*\s*=\s*(?:\{|\[|[\"\']|\w+\())', t, re.I):
-            in_code = True
+        start = bool(re.match(
+            r'^(?:\#\s*(?:financial|decision|numerical|verified|data|fact|trend|strategic|risk|python|code)|'
+            r'(?:from\s+\w+\s+import|import\s+\w+)|'
+            r'(?:print|json\.dumps)\s*\(|'
+            r'[A-Za-z_][\w]*\s*(?::\s*\w+)?=|'
+            r'(?:const|let|var)\s+\w+\s*=|'
+            r'[\[{]|'
+            r'["\'][^"\']+["\']\s*:)', t, re.I))
+        if start:
+            code = True
+            brace_depth += t.count('{') + t.count('[') - t.count('}') - t.count(']')
             continue
-        if in_code:
-            if (t in ('}', ']', '},', '],') or
-                re.match(r'^[\[\]{}(),]*$', t) or
-                re.match(r'^[\"\'][^\"\']+[\"\']\s*:', t) or
-                re.match(r'^[A-Za-z_][\w]*\s*=', t)):
+        if code:
+            continuation = (brace_depth > 0 and bool(re.match(r'^[\w"\'\[\]{}(),:;.=+\- ]+$', t))) or bool(re.match(
+                r'^(?:[}\]],?|["\'][^"\']+["\']\s*:|[\w]+\s*=|\#|print\s*\(|return\s+)', t))
+            if continuation:
+                brace_depth += t.count('{') + t.count('[') - t.count('}') - t.count(']')
                 continue
-            in_code = False
-        if (re.match(r'^[\[\]{}(),]*$', t) or
-            re.match(r'^[\"\'][^\"\']+[\"\']\s*:', t) or
-            re.match(r'^(?:print\(|(?:data|facts|trends|metrics|decisions)\s*=)', t)):
-            continue
-        lines.append(line)
-    cleaned = '\n'.join(lines).strip()
-    if re.search(r'(?m)^\s*(?:def |class |for .*:|if .*:|print\(|\w+\s*=\s*\{|[{}])', cleaned):
-        return None
+            code = False
+            brace_depth = 0
+        if re.search(r'\b(?:print\(|[a-z_]+\s*=\s*\{|def\s+\w+\(|import\s+\w+)', t, re.I):
+            return None
+        output.append(line)
+    cleaned = '\n'.join(output).strip()
     return cleaned or None
 
 

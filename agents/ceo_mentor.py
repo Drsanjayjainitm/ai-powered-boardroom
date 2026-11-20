@@ -135,13 +135,17 @@ def _validated_ai_sections(answer):
         'financial and risk tradeoffs': titles[1], 'financial and risk trade offs': titles[1],
         'financial trade-offs': titles[1], 'financial and risk considerations': titles[1],
         'reflection and learning': titles[2], 'reflection & learning': titles[2],
-        'learning and reflection': titles[2], 'reflection': titles[2],
+        'learning and reflection': titles[2], 'reflection': titles[2], 'learning reflections': titles[2],
+        'strategic strengths and opportunities': titles[0],
+        'financial and risk tradeoffs': titles[1],
+        'financial and risk trade-offs and considerations': titles[1],
     }
     sections = {t: [] for t in titles}
     current = None
     for line in cleaned.splitlines():
         stripped = line.strip()
         heading = re.sub(r'^#{1,6}\s*', '', stripped)
+        heading = re.sub(r'^\d+[.)]\s*', '', heading)
         heading = re.sub(r'^\*\*(.*?)\*\*:?$', r'\1', heading).strip().rstrip(':').strip()
         heading = re.sub(r'^[-*]\s+', '', heading).strip()
         if heading.lower() in aliases:
@@ -162,7 +166,18 @@ def _validated_ai_sections(answer):
             continue
         sections[current].append(stripped)
     if any(not sections[t] for t in titles):
-        return None
+        # Some providers omit headings despite explicit instructions. Only accept
+        # three substantial, clean paragraphs in the expected order; never infer
+        # facts or allow a numeric claim through this recovery path.
+        if not any(sections[t] for t in titles):
+            paragraphs = [x.strip() for x in re.split(r'\n\s*\n', cleaned)
+                          if len(x.strip().split()) >= 15]
+            if len(paragraphs) == 3 and all(not re.search(r'[0-9₹%$]|[{}]|\bprint\(', x) for x in paragraphs):
+                sections = {title: [paragraphs[i]] for i, title in enumerate(titles)}
+            else:
+                return None
+        else:
+            return None
     prose = '\n\n'.join('### ' + title + '\n' + ' '.join(sections[title]) for title in titles)
     return prose if len(prose.split()) >= 25 else None
 

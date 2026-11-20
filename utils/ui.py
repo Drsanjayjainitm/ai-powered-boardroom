@@ -28,6 +28,20 @@ h1 {font-weight:800 !important;}
 .hero p {color:#d8e7f2;margin:0;max-width:850px;line-height:1.6;}
 .pill {display:inline-block;border:1px solid #bfdfe0;border-radius:30px;padding:.25rem .65rem;
  color:#086a70;background:#eefafa;font-size:.78rem;font-weight:700;}
+/* Spacious, legible competition dashboard with robust narrow-screen behavior. */
+[data-testid="stVerticalBlockBorderWrapper"] {border-radius:16px;}
+[data-testid="stHorizontalBlock"] {align-items:stretch;}
+[data-testid="stDataFrame"] {max-width:100%;}
+[data-testid="stMetricDelta"] {font-weight:600;}
+[data-testid="stSidebarNav"] a {border-radius:9px;}
+[data-testid="stSidebarNav"] a:hover {background:rgba(8,126,133,.09);}
+[data-testid="stButton"] button {min-height:2.45rem;transition:box-shadow .15s ease, transform .15s ease;}
+[data-testid="stButton"] button:hover {box-shadow:0 5px 18px rgba(18,38,68,.12);}
+@media print { [data-testid="stSidebar"], header, footer, [data-testid="stToolbar"] {display:none!important;}
+ .block-container {max-width:100%!important;padding:.4rem!important;}
+ [data-testid="stHorizontalBlock"] {break-inside:avoid;}
+ [data-testid="stMetric"] {box-shadow:none;break-inside:avoid;}
+ .hero {print-color-adjust:exact;-webkit-print-color-adjust:exact;} }
 @media(max-width:700px){.hero {padding:1.05rem}.hero h1{font-size:1.55rem}.block-container{padding-left:.85rem;padding-right:.85rem}}
 </style>
 """
