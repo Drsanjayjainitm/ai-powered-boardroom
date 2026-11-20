@@ -28,6 +28,9 @@ for key, value in defaults.items():
 ADVISORS = ["CFO", "CMO", "CHRO", "COO", "Risk Officer"]
 
 with st.sidebar:
+    st.page_link("app.py", label="AI-Powered Boardroom", icon="🏢")
+    st.page_link("pages/2_CEO_Decision_Lab.py", label="CEO Decision Lab", icon="📈")
+    st.divider()
     st.header("Simulation setup")
     st.success("Scenario 1 · Retail Business Recovery")
     st.write("**Company:** " + RETAIL_SCENARIO["company"])
@@ -44,7 +47,7 @@ with st.sidebar:
         model = st.text_input("Model", value="gpt-4o-mini")
     elif provider == "Google Gemini":
         api_key, model = gemini_sidebar()
-    st.caption("Demo is rule-based, not generative AI. Gemini is configured through Streamlit Secrets; local Ollama requires a local server.")
+    st.caption("Demo is rule-based, not generative AI. Gemini supports an administrator key or an optional session-only personal key; local Ollama requires a local server.")
     if st.button("Reset current simulation"):
         st.session_state["last_result"] = None
         st.session_state["last_decision"] = None
@@ -52,7 +55,7 @@ with st.sidebar:
         st.session_state.pop("studio_board_all", None)
         st.rerun()
 
-hero('PROMPTED 2026 · PROFESSIONAL TRACK · MILESTONE 4.1.6.1 · CLASSROOM PILOT',
+hero('AI-POWERED BOARDROOM · INTERACTIVE MANAGEMENT SIMULATOR',
      'AI-Powered Boardroom',
      'Lead the recovery of Aarohan Retail. Make strategic decisions, challenge five AI advisors, and defend the trade-offs.')
 st.markdown('<span class="pill">CEO Strategy Studio · Single-decision sandbox</span>', unsafe_allow_html=True)
@@ -211,3 +214,6 @@ st.divider()
 st.caption("Educational prototype · Rule-based demo responses are not generative AI. "
            "The numerical model uses transparent fictional assumptions. "
            "Live AI output must be checked critically. Session data is not persisted after the session ends.")
+
+
+st.caption("Developed by Dr. Sanjay Jain · Professor, Department of Computer Science & Applications · ITM University Gwalior, India. Educational simulation; fictional data and illustrative outcomes.")

@@ -17,7 +17,7 @@ from agents.advisors import get_advisor_recommendations
 
 st.set_page_config(page_title='CEO Decision Lab | AI-Powered Boardroom', page_icon='📈', layout='wide')
 apply_theme()
-hero('PROMPTED 2026 · PROFESSIONAL TRACK · MILESTONE 4.1.6.1 · CLASSROOM PILOT',
+hero('AI-POWERED BOARDROOM · INTERACTIVE MANAGEMENT SIMULATOR',
      'CEO Decision Lab',
      'Three decisions. One recovery strategy. Use evidence, debate trade-offs, and reflect like a CEO.')
 st.markdown('<span class="pill">3-round learning journey · Aarohan Retail Pvt. Ltd.</span>', unsafe_allow_html=True)
@@ -32,6 +32,9 @@ if 'm3_dialogues' not in st.session_state:
 history = st.session_state.m3_history
 n = len(history)
 with st.sidebar:
+    st.page_link('app.py', label='AI-Powered Boardroom', icon='🏢')
+    st.page_link('pages/2_CEO_Decision_Lab.py', label='CEO Decision Lab', icon='📈')
+    st.divider()
     st.header('CEO Lab controls')
     provider = st.selectbox('Advisor mode', ['Demo mode (no API key)', 'Ollama (local, free)', 'OpenAI', 'Google Gemini'], key='m3_provider')
     api_key = ''
@@ -217,5 +220,8 @@ if history:
                        file_name='ceo_decision_portfolio.json', mime='application/json')
 
 st.divider()
-st.caption('Milestone 4.1.6.1 classroom pilot release · Data stored in current Streamlit session only. '
+st.caption('Competition-ready educational prototype · Data stored in current Streamlit session only. '
            'Avoid entering personal or confidential business information.')
+
+
+st.caption("Developed by Dr. Sanjay Jain · Professor, Department of Computer Science & Applications · ITM University Gwalior, India. Educational simulation; fictional data and illustrative outcomes.")

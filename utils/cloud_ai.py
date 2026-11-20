@@ -21,16 +21,36 @@ def gemini_settings():
     return key, model, bool(key)
 
 def gemini_sidebar():
-    """Safe controls shared by both Streamlit pages."""
-    key, model, configured = gemini_settings()
+    """Session-only optional personal key; administrator key stays secret."""
+    admin_key, model, configured = gemini_settings()
     if configured:
-        st.success("Gemini is configured by the application administrator.")
-        st.caption("The API key is stored privately and is not shown to students.")
+        st.success("Gemini AI is available for this session.")
     else:
-        st.warning("Gemini is not configured. Ask the administrator to set GEMINI_API_KEY in Streamlit Secrets.")
-        st.caption("Choose Demo mode until the administrator configures Gemini.")
-    st.caption("Gemini model: " + model)
-    gemini_diagnostic_panel(key, model)
+        st.info("Enter your own Gemini API key to enable AI coaching, or use Demo mode.")
+
+    use_own_key = st.checkbox(
+        "Use my own Gemini API key (optional)",
+        value=False,
+        key="boardroom_use_own_gemini_key",
+        help="Your key is used only for requests in this browser session and is not saved by the application.",
+    )
+    if use_own_key:
+        personal_key = st.text_input(
+            "Personal Gemini API key", type="password", value="",
+            key="boardroom_personal_gemini_key",
+            help="Do not share your key in screenshots, reports or public repositories.",
+        ).strip()
+        st.caption("Your own API usage may incur charges under your Google account. Do not enter shared or institutional credentials.")
+        if not personal_key:
+            st.warning("Enter your key, or untick this option to use the application key.")
+        key = personal_key  # Never silently use administrator quota when BYOK was selected.
+    else:
+        key = admin_key
+        if not configured:
+            st.caption("No administrator Gemini key is configured.")
+
+    st.caption("AI model: " + model)
+    # Administrator diagnostics are intentionally not exposed in this public release.
     return key, model
 
 
