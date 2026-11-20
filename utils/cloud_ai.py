@@ -30,4 +30,20 @@ def gemini_sidebar():
         st.warning("Gemini is not configured. Ask the administrator to set GEMINI_API_KEY in Streamlit Secrets.")
         st.caption("Choose Demo mode until the administrator configures Gemini.")
     st.caption("Gemini model: " + model)
+    gemini_diagnostic_panel(key, model)
     return key, model
+
+
+def gemini_diagnostic_panel(key, model):
+    """Optional admin-only connection test; disabled unless explicitly enabled."""
+    if secret_value("ENABLE_GEMINI_DIAGNOSTICS", "false").lower() != "true":
+        return
+    with st.sidebar.expander("Gemini connection diagnostics (administrator)"):
+        st.caption("Temporarily enable for supervised testing only; disable afterward. Each test uses one API request.")
+        if st.button("Test Gemini connection", key="gemini_diagnostic_test"):
+            from utils.gemini_diagnostics import check_gemini_connection
+            ok, detail = check_gemini_connection(key, model)
+            if ok:
+                st.success(detail)
+            else:
+                st.error(detail)
