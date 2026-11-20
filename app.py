@@ -1,4 +1,5 @@
 from utils.cloud_ai import gemini_sidebar
+from utils.board_dashboard import render_board
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -48,6 +49,7 @@ with st.sidebar:
         st.session_state["last_result"] = None
         st.session_state["last_decision"] = None
         st.session_state["last_assessment"] = None
+        st.session_state.pop("studio_board_all", None)
         st.rerun()
 
 hero('PROMPTED 2026 · PROFESSIONAL TRACK · COMPETITION QUALITY PATCH 3.4.1',
@@ -100,6 +102,7 @@ if st.button("🚀 Run business simulation", type="primary", use_container_width
         st.session_state["last_decision"] = decision.copy()
         st.session_state["last_assessment"] = assess_decision(decision, result)
         st.session_state["dialogues"] = {}  # questions belong to the current decision
+        st.session_state.pop("studio_board_all", None)
 
 result = st.session_state.get("last_result")
 if not isinstance(result, dict):
@@ -135,6 +138,8 @@ for note in result["explanations"]:
 st.info(f"Modelled risk: {result['risk_level']}. Profit includes the one-time investment; revenue growth does not imply immediate profit growth.")
 
 st.markdown("### 4 · Interactive AI Boardroom")
+render_board(current_decision, result, provider, api_key, model, "studio_board_all")
+st.markdown("#### Ask an individual advisor")
 st.caption("Choose an advisor, review their position, and ask follow-up questions. Each role has its own dialogue history.")
 role = st.selectbox("Advisor to consult", ADVISORS, key="advisor_role")
 with st.expander(f"Initial {role} recommendation", expanded=True):

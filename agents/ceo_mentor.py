@@ -15,12 +15,13 @@ The rounds are cumulative revisions of ONE year-one estimate, not separate years
 The rubric is formative, not a validated competence measure.
 Use only supplied decision choices, student reflections and verified trend statements.
 Avoid invented business facts, unsupported causal certainty and generic praise.
-Use EXACTLY these four headings:
+Use EXACTLY these three headings, each on its own line:
 ### Strategic Strengths
 ### Financial and Risk Trade-offs
 ### Reflection and Learning
-### Two Feasible Next Actions and One CEO Question
-Under each heading provide specific, short qualitative feedback. Keep it under 190 words.
+Provide two or three complete sentences under each heading, grounded in the supplied student rationale and reflections.
+Do NOT generate action lists or CEO questions; Python provides those separately.
+Keep it between 80 and 160 words. Never repeat the numeric case evidence.
 Pricing and operations choices must be described exactly as supplied. Never claim a change
 unless VERIFIED DECISION CHANGES explicitly confirms it. Never introduce hypothetical
 risks as if they occurred. Under the final heading, suggest exactly two actions and one
@@ -123,10 +124,11 @@ def _validated_ai_sections(answer):
     titles = ('Strategic Strengths', 'Financial and Risk Trade-offs', 'Reflection and Learning')
     sections = {}
     current = None
+    # Accept common Markdown formatting variants, but never trust generated figures.
     for line in answer.splitlines():
         stripped = line.strip()
         if stripped.startswith('#'):
-            heading = stripped.lstrip('#').strip().replace('**', '')
+            heading = stripped.lstrip('#').strip().replace('**', '').rstrip(':').strip()
             current = heading if heading in titles else None
             if current:
                 sections[current] = []
@@ -235,7 +237,7 @@ def mentor_feedback(history, provider='Demo mode (no API key)', api_key='', mode
         else:
             return 'Unsupported provider.'
         safe = _validated_ai_sections(answer)
-        if not safe or len(safe.split()) < 35:
+        if not safe or len(safe.split()) < 25:
             safe = _fallback_commentary(history, f)
             label = '**Qualitative mentor feedback — rule-based fallback (AI response did not pass validation)**'
         else:

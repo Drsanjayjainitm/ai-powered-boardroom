@@ -1,5 +1,6 @@
 """PromptEd Milestone 3: a 3-round cumulative investment teaching exercise."""
 from utils.cloud_ai import gemini_sidebar
+from utils.board_dashboard import render_board
 import json
 import pandas as pd
 import plotly.express as px
@@ -46,6 +47,7 @@ with st.sidebar:
     if st.button('Reset all three rounds', key='m3_reset'):
         st.session_state.m3_history = []
         st.session_state.m3_dialogues = {}
+        st.session_state.pop('m3_board_all', None)
         st.session_state.pop('m31_mentor', None)
         st.rerun()
 
@@ -94,6 +96,7 @@ if n < MAX_ROUNDS:
             record = run_round(history, increments, pricing, operations, rationale, reflection)
             history.append(record)
             st.session_state.m3_dialogues = {}
+            st.session_state.pop('m3_board_all', None)
             st.session_state.pop('m31_mentor', None)
             st.rerun()
         except (ValueError, RuntimeError) as exc:
@@ -116,6 +119,8 @@ if history:
                'These are revised scenario estimates, not realised business results.')
 
     st.subheader('Advisor challenge')
+    render_board(latest['decision'], r, provider, api_key, model, 'm3_board_all')
+    st.markdown('#### Ask an individual advisor')
     role = st.selectbox('Consult an advisor on your latest decision',
                         ['CFO','CMO','CHRO','COO','Risk Officer'], key='m3_role')
     with st.expander(f'{role} initial recommendation', expanded=True):

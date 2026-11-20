@@ -44,7 +44,14 @@ def ask_advisor(role, question, decision, result, provider, api_key="", model=""
     context = (ADVISOR_BRIEFS[role] + "\nAct as a classroom coach, not a financial calculator. "
                "Python separately supplies all verified case facts. Answer with conceptual teaching guidance "
                "only. Do not mention numbers, financial quantities, business results, or decision changes. "
-               "Ask a thought-provoking question. Under 100 words.")
+               "Ask a thought-provoking question. Under 100 words. "
+               "IMPORTANT: Do not repeat the learner question. Even if the learner asks about profit, "
+               "respond using only nonfinancial learning language. "
+               "Use these headings: Reflection and CEO challenge. Discuss assumptions, evidence quality, "
+               "alternative hypotheses, implementation checks and what should be tested next. "
+               "Avoid these words entirely: revenue, profit, budget, investment, reserve, cash, "
+               "pricing, prices, operations, risk, satisfaction, loss, gain, increase, decrease, "
+               "growth, decline, ROI, payback. Do not use digits, currency or percentages.")
     prompt = qualitative_context(decision, result) + "\nLearner question: " + question
     try:
         if provider == "Ollama (local, free)":

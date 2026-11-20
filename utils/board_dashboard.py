@@ -1,0 +1,40 @@
+"""On-demand, session-persistent five-advisor board review."""
+import hashlib
+import json
+import streamlit as st
+from agents.advisors import get_advisor_recommendations
+
+ROLES = ('CFO', 'CMO', 'CHRO', 'COO', 'Risk Officer')
+
+def render_board(decision, result, provider, api_key, model, state_key):
+    """Keep five advisor outputs visible without repeating calls on reruns."""
+    signature_data = {'decision': decision, 'result': result, 'provider': provider, 'model': model,
+                      'credential_configured': bool(api_key)}
+    signature = hashlib.sha256(json.dumps(signature_data, sort_keys=True, default=str).encode()).hexdigest()
+    saved = st.session_state.get(state_key)
+    if saved and saved.get('signature') != signature:
+        st.session_state.pop(state_key, None)
+        saved = None
+    st.markdown('#### AI Board of Directors — all five perspectives')
+    st.caption('Generate all five recommendations for the latest decision, then compare them side by side. '
+               'Outputs stay on screen during this browser session. Refreshing other controls does not repeat API calls.')
+    if st.button('Generate / refresh all five advisor recommendations', key=state_key + '_generate'):
+        # One click may trigger five provider requests. Never auto-call on rerender.
+        responses = {}
+        with st.spinner('Consulting the five advisors…'):
+            for role in ROLES:
+                responses[role] = get_advisor_recommendations(role, decision, result, provider, api_key, model)
+        st.session_state[state_key] = {'signature': signature, 'responses': responses}
+        saved = st.session_state[state_key]
+    if not saved:
+        st.info('Click the button to display all five advisor outcomes. In Gemini mode, this uses up to five API requests.')
+        return
+    for start in (0, 2, 4):
+        pair = ROLES[start:start+2]
+        cols = st.columns(len(pair))
+        for col, role in zip(cols, pair):
+            with col:
+                with st.container(border=True):
+                    st.markdown(f'**{role}**')
+                    st.markdown(saved['responses'][role])
+    st.caption('Python computes the verified financial evidence. AI commentary is screened; fallback text is labelled.')
