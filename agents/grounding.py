@@ -55,19 +55,57 @@ def qualitative_context(decision, result):
 
 # Financial vocabulary is normal in management coaching. Reject invented figures,
 # not words such as "profit" or "risk"; Python alone supplies numeric evidence.
-def safe_qualitative(text):
-    """Conservatively screen a short, nonnumeric coaching response."""
+def sanitize_ai_prose(text):
+    """Remove model-generated code artifacts, without silently rewriting financial claims.
+
+    Return None if code is interleaved with prose in an unsafe or ambiguous way.
+    """
     if not isinstance(text, str):
         return None
-    cleaned = text.strip()
-    if len(cleaned) < 35 or len(cleaned.split()) > 180:
+    # Remove complete fenced code blocks (including malformed open fences).
+    text = re.sub(r'```[^\n]*\n.*?(?:```|\Z)', '', text, flags=re.S)
+    text = re.sub(r'~~~[^\n]*\n.*?(?:~~~|\Z)', '', text, flags=re.S)
+    lines = []
+    in_code = False
+    for line in text.splitlines():
+        t = line.strip()
+        if not t:
+            if not in_code:
+                lines.append('')
+            continue
+        # A generated Python/JSON snippet can be unfenced and embedded in Markdown.
+        if re.match(r'^(?:#\s*(?:decision|financial|numerical|verified|data|facts|trend)|'
+                    r'(?:from|import)\s+\w+|(?:print|json\.dumps)\s*\(|'
+                    r'[A-Za-z_][\w]*\s*=\s*(?:\{|\[|[\"\']|\w+\())', t, re.I):
+            in_code = True
+            continue
+        if in_code:
+            if (t in ('}', ']', '},', '],') or
+                re.match(r'^[\[\]{}(),]*$', t) or
+                re.match(r'^[\"\'][^\"\']+[\"\']\s*:', t) or
+                re.match(r'^[A-Za-z_][\w]*\s*=', t)):
+                continue
+            in_code = False
+        if (re.match(r'^[\[\]{}(),]*$', t) or
+            re.match(r'^[\"\'][^\"\']+[\"\']\s*:', t) or
+            re.match(r'^(?:print\(|(?:data|facts|trends|metrics|decisions)\s*=)', t)):
+            continue
+        lines.append(line)
+    cleaned = '\n'.join(lines).strip()
+    if re.search(r'(?m)^\s*(?:def |class |for .*:|if .*:|print\(|\w+\s*=\s*\{|[{}])', cleaned):
+        return None
+    return cleaned or None
+
+
+def safe_qualitative(text):
+    """Screen coaching prose; Python alone owns numerical evidence."""
+    cleaned = sanitize_ai_prose(text)
+    if not cleaned or len(cleaned) < 35 or len(cleaned.split()) > 180:
         return None
     if re.search(r'[0-9₹%$]', cleaned):
         return None
     if re.search(r'\bprofit (?:declined|fell|decreased) because of (?:the )?reserve\b', cleaned, re.I):
         return None
-    # Explicit invented decision descriptions / unsupported numerical comparisons
-    # are excluded; verified decisions and all figures appear separately.
     if re.search(r'\b(?:you (?:chose|selected|changed|increased|decreased|allocated)|'
                  r'you(?:r company)? (?:earned|spent|invested)|'
                  r'budget (?:was|is) exceeded|guaranteed (?:return|profit))\b', cleaned, re.I):
