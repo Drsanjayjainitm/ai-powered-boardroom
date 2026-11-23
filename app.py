@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 
 from utils.ui import apply_theme, hero
+from utils.charts import polish_chart
 from scenarios.retail import RETAIL_SCENARIO
 from simulation.decision_engine import evaluate_retail_decision
 from simulation.strategy_comparison import compare_strategies
@@ -130,11 +131,11 @@ financial = plot.iloc[:2].copy()
 nonfinancial = plot.iloc[2:].copy()
 fc1, fc2 = st.columns(2)
 with fc1:
-    st.plotly_chart(px.bar(financial, x="Measure", y=["Baseline","Projected"],
-                           barmode="group", title="Financial outcomes (₹ lakh)"), use_container_width=True)
+    st.plotly_chart(polish_chart(px.bar(financial, x="Measure", y=["Baseline","Projected"],
+                           barmode="group", title="Financial outcomes (₹ lakh)")), use_container_width=True)
 with fc2:
-    st.plotly_chart(px.bar(nonfinancial, x="Measure", y=["Baseline","Projected"],
-                           barmode="group", title="Satisfaction (points) and market share (%)"),
+    st.plotly_chart(polish_chart(px.bar(nonfinancial, x="Measure", y=["Baseline","Projected"],
+                           barmode="group", title="Satisfaction (points) and market share (%)")),
                     use_container_width=True)
 for note in result["explanations"]:
     st.write("• " + note)
@@ -184,8 +185,8 @@ if saved:
         rows = compare_strategies([(name, saved[name]) for name in names])
         frame = pd.DataFrame(rows)
         st.dataframe(frame, use_container_width=True, hide_index=True)
-        st.plotly_chart(px.bar(frame, x="Strategy", y="Year-one profit (₹ lakh)",
-                               color="Strategy", title="Year-one profit comparison"), use_container_width=True)
+        st.plotly_chart(polish_chart(px.bar(frame, x="Strategy", y="Year-one profit (₹ lakh)",
+                               title="Year-one profit comparison"), legend=False), use_container_width=True)
         st.download_button("Download strategy comparison (CSV)", frame.to_csv(index=False).encode("utf-8-sig"),
                            file_name="strategy_comparison.csv", mime="text/csv")
         st.caption("First-year investment return proxy = (projected profit after investment − baseline profit) / investment × 100. "
@@ -202,8 +203,8 @@ if isinstance(assessment, dict):
     st.metric("Formative decision score", f"{assessment['total']}/100")
     scores = pd.DataFrame({"Dimension":list(assessment["dimensions"]),
                            "Score":list(assessment["dimensions"].values())})
-    st.plotly_chart(px.bar(scores, x="Dimension", y="Score", range_y=[0,20],
-                           title="Decision rubric (0–20 per dimension)"), use_container_width=True)
+    st.plotly_chart(polish_chart(px.bar(scores, x="Dimension", y="Score", range_y=[0,20],
+                           title="Decision rubric (0–20 per dimension)"), legend=False, bottom=115), use_container_width=True)
     for feedback in assessment["feedback"]:
         st.write("• " + feedback)
     report = make_report(current_decision, result, assessment)

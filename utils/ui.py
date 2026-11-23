@@ -32,6 +32,7 @@ h1 {font-weight:800 !important;}
 [data-testid="stVerticalBlockBorderWrapper"] {border-radius:16px;}
 [data-testid="stHorizontalBlock"] {align-items:stretch;}
 [data-testid="stDataFrame"] {max-width:100%;}
+[data-testid="stPlotlyChart"] {max-width:100%; overflow:visible;}
 [data-testid="stMetricDelta"] {font-weight:600;}
 [data-testid="stSidebarNav"] a {border-radius:9px;}
 [data-testid="stSidebarNav"] a:hover {background:rgba(8,126,133,.09);}
@@ -41,7 +42,9 @@ h1 {font-weight:800 !important;}
  .block-container {max-width:100%!important;padding:.4rem!important;}
  [data-testid="stHorizontalBlock"] {break-inside:avoid;}
  [data-testid="stMetric"] {box-shadow:none;break-inside:avoid;}
- .hero {print-color-adjust:exact;-webkit-print-color-adjust:exact;} }
+ .hero {print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+ [data-testid="stPlotlyChart"] {break-inside:avoid; page-break-inside:avoid;}
+ [data-testid="stDataFrame"] {overflow-x:auto; max-width:100%;} }
 @media(max-width:700px){.hero {padding:1.05rem}.hero h1{font-size:1.55rem}.block-container{padding-left:.85rem;padding-right:.85rem}}
 </style>
 """

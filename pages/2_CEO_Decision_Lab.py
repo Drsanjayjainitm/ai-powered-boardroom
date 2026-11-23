@@ -8,6 +8,7 @@ import streamlit as st
 from decimal import Decimal, ROUND_HALF_UP
 
 from utils.ui import apply_theme, hero
+from utils.charts import polish_chart
 from simulation.multiround import (CAPS, BUDGET, MAX_ROUNDS, run_round,
                                    learning_rows, downside_sensitivity)
 from agents.dialogue import ask_advisor
@@ -151,11 +152,11 @@ if history:
     fig = px.line(frame, x='Round', y='Year-one profit after investment (₹ lakh)', markers=True,
                   title='How revised strategies change the year-one profit estimate')
     fig.update_xaxes(dtick=1)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(polish_chart(fig, legend=False), use_container_width=True)
     rubric = pd.DataFrame([{'Round': item['round'], **item['assessment']['dimensions']} for item in history])
     long_rubric = rubric.melt(id_vars='Round', var_name='Learning dimension', value_name='Score')
-    st.plotly_chart(px.bar(long_rubric, x='Round', y='Score', color='Learning dimension',
-                           barmode='group', range_y=[0,20], title='Rubric by round (0–20 per dimension)'),
+    st.plotly_chart(polish_chart(px.bar(long_rubric, x='Round', y='Score', color='Learning dimension',
+                           barmode='group', range_y=[0,20], title='Rubric by round (0–20 per dimension)'), bottom=95),
                     use_container_width=True)
     st.caption('Rubric scores are rule-based formative indicators, not validated measures of managerial competence.')
 
@@ -220,7 +221,7 @@ if history:
                        file_name='ceo_decision_portfolio.json', mime='application/json')
 
 st.divider()
-st.caption('Competition-ready educational prototype · Data stored in current Streamlit session only. '
+st.caption('Interactive educational prototype · Data stored in current Streamlit session only. '
            'Avoid entering personal or confidential business information.')
 
 

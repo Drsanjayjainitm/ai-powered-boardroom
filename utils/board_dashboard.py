@@ -10,7 +10,7 @@ ROLES = ('CFO', 'CMO', 'CHRO', 'COO', 'Risk Officer')
 def render_board(decision, result, provider, api_key, model, state_key):
     """Keep five advisor outputs visible without repeating calls on reruns."""
     signature_data = {'decision': decision, 'result': result, 'provider': provider, 'model': model,
-                      'credential_configured': bool(api_key)}
+                      'credential_fingerprint': hashlib.sha256((api_key or '').encode('utf-8')).hexdigest()}
     signature = hashlib.sha256(json.dumps(signature_data, sort_keys=True, default=str).encode()).hexdigest()
     saved = st.session_state.get(state_key)
     if saved and saved.get('signature') != signature:
