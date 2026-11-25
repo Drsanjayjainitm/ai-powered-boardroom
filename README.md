@@ -20,9 +20,9 @@ streamlit run app.py
 
 Python 3.10+ recommended. Select Demo mode for offline, rule-based testing. Gemini requires an API key; an administrator can configure it in Streamlit Community Cloud **Secrets** (never in GitHub).
 
-## Reviewer guide
+## Guidelines
 
-| Review setup | Select in the app |
+| Setup | Select in the app |
 | --- | --- |
 | Hosted Streamlit Community Cloud link | **Google Gemini** for live AI feedback when an API key is configured, or **Demo mode (no API key)** for rule-based feedback. |
 | Streamlit running on your computer | **Ollama (local, free)** for local AI feedback. Follow the setup below. |
